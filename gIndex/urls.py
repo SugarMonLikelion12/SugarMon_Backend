@@ -5,4 +5,5 @@ from . import views
 app_name = 'gIndex'
 
 urlpatterns = [
+    path('registerGI', registerGIAPI.as_view()),
 ]
