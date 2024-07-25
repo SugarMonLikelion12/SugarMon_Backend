@@ -4,9 +4,14 @@ from .models import gIndex
 class RegisterGISerializer(serializers.ModelSerializer):
     class Meta:
         model = gIndex
-        fields = ['foodName', 'gIndex']
+        fields = ['id', 'foodName', 'gIndex']
 
 class GetOneGISerializer(serializers.ModelSerializer):
     class Meta:
         model = gIndex
-        fields = '__all__'
+        fields = ['gIndex', 'user']
+
+class GetFoodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = gIndex
+        fields = ['id', 'foodName']

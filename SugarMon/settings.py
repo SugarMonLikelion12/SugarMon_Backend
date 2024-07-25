@@ -14,11 +14,6 @@ from pathlib import Path
 import pymysql
 from decouple import config
 
-try:
-    from .local_settings import *
-except ImportError:
-    pass
-
 # PyMySQL 세팅
 pymysql.install_as_MySQLdb()
 
@@ -161,3 +156,10 @@ SWAGGER_SETTINGS = {
         'USE_SESSION_AUTH': None,
       }
    }
+
+
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass

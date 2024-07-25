@@ -37,7 +37,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('user/', include('user.urls')),
-    path('food/', include('food.urls')),
+    path('ateFood/', include('food.urls')),
     path('gIndex/', include('gIndex.urls')),
     path('checkList/', include('checkList.urls')),
 ]
