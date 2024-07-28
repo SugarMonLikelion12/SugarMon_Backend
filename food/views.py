@@ -62,14 +62,14 @@ class getMonthAteFoodUserAPI(APIView):
     @swagger_auto_schema(
             tags=['먹은음식'],
             operation_summary="특정 년월에 현재 유저가 먹은음식 불러오기",
-            operation_description="요청한 year과 month에 현재 접속한 유저가 먹은 음식들을 불러온다.",
+            operation_description="요청한 year과 month에 현재 접속한 유저가 먹은 음식들을 불러온다. (날짜 기준 오름차순)",
             responses={200: openapi.Response(
                 description="불러오기 성공",
                 schema=ResponseAteFoodSerializer(many=True)
             )})
     @method_decorator(permission_classes([IsAuthenticated]))
     def get(self, request, year, month):
-        ateFoodList = AteFood.objects.filter(user=request.user, ateDate__year=year, ateDate__month=month)
+        ateFoodList = AteFood.objects.filter(user=request.user, ateDate__year=year, ateDate__month=month).order_by('ateDate')
 
         try:
             serializer = ResponseAteFoodSerializer(instance=ateFoodList, many=True)
