@@ -8,10 +8,13 @@ from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 
 # Create your views here.
 class registerGIAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
     @swagger_auto_schema(
             tags=['혈당지수'],
             operation_summary="혈당지수 등록",
@@ -32,6 +35,8 @@ class registerGIAPI(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class getGIAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
     @swagger_auto_schema(
             tags=['혈당지수'],
             operation_summary="혈당지수 가져오기",
@@ -52,6 +57,8 @@ class getGIAPI(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class getFoodAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
     @swagger_auto_schema(
             tags=['혈당지수'],
             operation_summary="등록된 음식 이름 가져오기",

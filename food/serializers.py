@@ -4,9 +4,9 @@ from .models import AteFood
 class RegisterAteFoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = AteFood
-        fields = ['name', 'ateDate', 'when']
+        fields = ['id', 'name', 'ateDate', 'when']
 
 class ResponseAteFoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = AteFood
-        fields = ['name', 'ateDate', 'when']
+        fields = ['id', 'name', 'ateDate', 'when']
