@@ -14,6 +14,7 @@ from pathlib import Path
 import pymysql
 from decouple import config
 
+# PyMySQL 세팅
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '3.37.188.30']
+ALLOWED_HOSTS = ['127.0.0.1', '3.37.188.30', 'localhost']
 
 
 # Application definition
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_yasg',
     'user',
     'food',
     'gIndex',
@@ -142,6 +144,20 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.User'
+
+# Swagger 설정
+SWAGGER_SETTINGS = {
+      'SECURITY_DEFINITIONS': {
+         'JWT Access Token': {
+               'type': 'apiKey',
+               'name': 'Authorization',
+               'in': 'header'
+         },
+        'USE_SESSION_AUTH': None,
+      }
+   }
+
+
 
 try:
     from .local_settings import *
