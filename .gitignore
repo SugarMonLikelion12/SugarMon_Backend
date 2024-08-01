@@ -173,6 +173,10 @@ myvenv/
 cert/*
 init-letsencrypt.sh
 
+# AWS key
+SugarMon_key.pem
+SugarMon_key.ppk
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
