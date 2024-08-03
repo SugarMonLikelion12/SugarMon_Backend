@@ -41,4 +41,5 @@ urlpatterns = [
     path('ateFood/', include('food.urls')),
     path('gIndex/', include('gIndex.urls')),
     path('accounts/', include('allauth.urls')),
+    path('checklist/', include('checkList.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

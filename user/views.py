@@ -4,11 +4,12 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.utils import swagger_auto_schema
 from .models import User
-from .serializers import UserSerializer
+from dj_rest_auth.registration.views import RegisterView
+from .serializers import CustomRegisterSerializer
 
-class RegisterView(generics.CreateAPIView):
+class CustomRegisterView(RegisterView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = CustomRegisterSerializer
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(operation_description="회원가입을 처리합니다.")

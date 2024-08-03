@@ -258,3 +258,7 @@ ACCOUNT_FORMS = {
     'signup': 'user.forms.CustomSignupForm',
     'login': 'user.forms.CustomLoginForm',
 }
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'user.serializers.CustomRegisterSerializer',
+}
+
