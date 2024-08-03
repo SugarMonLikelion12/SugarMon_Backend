@@ -1,22 +1,42 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+import jwt
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
 from .models import ChatRoom, Message
 import json
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    authentication_classes = [JWTAuthentication]
+
     # 웹소켓 연결 수립 시 실행되는 코드
     async def connect(self):
         try:
             self.chatRoomId = self.scope['url_route']['kwargs']['chatRoomId'] # ChatRoom 객체의 id를 가져온다.
 
-            isRoomExist = await ChatRoom.objects.get(pk=self.chatRoomId) # 해당 id를 가진 방이 존재하는지 확인
+            isRoomExist = await database_sync_to_async(ChatRoom.objects.get)(pk=self.chatRoomId) # 해당 id를 가진 방이 존재하는지 확인
             if not isRoomExist:
                 raise ValueError("존재하지 않는 채팅방 id입니다.")
             
             groupName = f"chatRoom{self.chatRoomId}" # unique한 그룹 이름
             await self.channel_layer.group_add(groupName, self.channel_name) # 현재 채널을 그룹에 추가
-            await self.accept()
             print("웹소켓에 클라이어늩가 연결됨")
+
+            headers = dict(self.scope['headers'])
+            rawToken = headers.get(b'authorization')[7:]
+            try:
+                accessToken = AccessToken(rawToken)
+                self.scope['userId'] = accessToken.payload['user_id']
+                await self.accept()
+            except jwt.ExpiredSignatureError:
+                self.scope['user'] = None
+                await self.close()
+            except jwt.InvalidTokenError:
+                self.scope['user'] = None
+                await self.close()
+            
+            print(self.scope['userId'])
 
         except ValueError as error: # 오류가 있는 경우, 오류 메시지를 반환
             await self.send_json({"error": str(error)})
@@ -26,8 +46,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # 웹소켓 연결 해제 시 실행되는 코드
         groupName = f"chatRoom{self.chatRoomId}"
-        await self.channel_layer.discard(groupName, self.channel_name) # 현재 채널을 그룹에서 제거
-
+        await self.channel_layer.group_discard(groupName, self.channel_name) # 현재 채널을 그룹에서 제거
+        print("웹소켓에 클라이어늩가 연결 해제됨")
 
     # 이건 별도의 컨슈머로 만들어야 할 거 같은데?? 메세지 보내고 받는 컨슈머
     async def receive_json(self, data):

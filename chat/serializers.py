@@ -11,11 +11,16 @@ class createChatRoomSerializer(serializers.ModelField):
         fields = ['id', 'user1', 'user2']
 
 class getMyChatRoomSerializer(serializers.ModelSerializer):
-    user2 = getUserSerializer()
+    opponentId = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
-        fields = ['id', 'user2']
+        fields = ['id', 'opponentId']
+
+    def get_opponentId(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        return obj.user2.id if obj.user1 == user else obj.user1.id
 
 class getMessagesSerializer(serializers.ModelSerializer):
     isMyChat = serializers.SerializerMethodField() # 해당 메시지가 현재 접속자가 보낸 채팅이라면 True, 아니면 False

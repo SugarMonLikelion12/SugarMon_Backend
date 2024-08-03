@@ -35,7 +35,7 @@ class CreateChatRoomAPI(APIView):
         if isExist:
             return Response({"message": "이미 해당 두 유저가 포함된 채팅방이 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = createChatRoomSerializer(data={'user1':user, 'user2':opponent})
+        serializer = createChatRoomSerializer(data={'user1':user.id, 'user2':opponent.id})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -58,7 +58,7 @@ class GetMyChatRoomAPI(APIView):
         user = request.user
 
         chatRoomList = ChatRoom.objects.filter(Q(user1 = user) | Q(user2 = user))
-        serializer = getMyChatRoomSerializer(instance=chatRoomList, many=True)
+        serializer = getMyChatRoomSerializer(instance=chatRoomList, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class GetChatMessagesAPI(APIView):
@@ -77,5 +77,5 @@ class GetChatMessagesAPI(APIView):
         chatRoom = ChatRoom.objects.get(pk=chatRoomId)
         messageList = Message.objects.filter(chatRoom=chatRoom, many=True).order_by('createdAt')
 
-        serializer = getMessagesSerializer(instance=messageList, many=True)
+        serializer = getMessagesSerializer(instance=messageList, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)

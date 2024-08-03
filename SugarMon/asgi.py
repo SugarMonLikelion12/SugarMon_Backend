@@ -17,13 +17,7 @@ import chat.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SugarMon.settings')
 
-django_asgi_app = get_asgi_application()
-
-applicaition = ProtocolTypeRouter({
-    "http": django_asgi_app, # http 요청은 기존 방식을 채용
-    "Websocket": AuthMiddleware(AllowedHostsOriginValidator( # ws 요청은 미들웨어 거친 후 chat.routing.py로 이동시킴
-        URLRouter(
-            chat.routing.websocket_urlpatterns
-        )
-    ))
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(), # http 요청은 기존 방식을 채용
+    "websocket": URLRouter(chat.routing.websocket_urlpatterns)
 })
