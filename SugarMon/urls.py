@@ -37,11 +37,8 @@ urlpatterns = [
     path(r'swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path(r'redoc', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc-v1'),
     path('admin/', admin.site.urls),
-
     path('user/', include('user.urls')),
     path('ateFood/', include('food.urls')),
     path('gIndex/', include('gIndex.urls')),
-    path('checkList/', include('checkList.urls')),
-    # path('dj/', include('dj_rest_auth.urls')),
-    # path('dj/registration/', include('dj_rest_auth.registration.urls')),
+    path('accounts/', include('allauth.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
