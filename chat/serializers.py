@@ -1,7 +1,33 @@
-# rest_framework의 serializers 모듈을 임포트합니다.
 from rest_framework import serializers
-# 현재 디렉토리의 models 모듈에서 ChatRoom, Message 모델을 임포트합니다.
 from .models import ChatRoom, Message
+from user.serializers import getUserSerializer
+
+class getOpponentSerializer(serializers.Serializer):
+    opponentId = serializers.IntegerField()
+
+class createChatRoomSerializer(serializers.ModelField):
+    class Meta:
+        model = ChatRoom
+        fields = ['id', 'user1', 'user2']
+
+class getMyChatRoomSerializer(serializers.ModelSerializer):
+    user2 = getUserSerializer()
+
+    class Meta:
+        model = ChatRoom
+        fields = ['id', 'user2']
+
+class getMessagesSerializer(serializers.ModelSerializer):
+    isMyChat = serializers.SerializerMethodField() # 해당 메시지가 현재 접속자가 보낸 채팅이라면 True, 아니면 False
+
+    class Meta:
+        model = Message
+        fields = ['sender', 'content', 'createdAt', 'isMyChat']
+    
+    def checkMyChat(self, obj):
+        request = self.context.get('request')
+        user=  request.user
+        return obj.sender == user
 
 # Message 모델에 대한 시리얼라이저 클래스입니다.
 class MessageSerializer(serializers.ModelSerializer):

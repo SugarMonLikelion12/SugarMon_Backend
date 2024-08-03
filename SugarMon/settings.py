@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ['127.0.0.1', '3.37.188.30', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,27 +84,27 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SugarMon.wsgi.application'
-ASGI_APPLICATION = 'SugarMon.asgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': config('DB_NAME'), # DB(스키마) 이름
-#         'USER': config('DB_USER'), # 유저 이름 (root)
-#         'PASSWORD': config('DB_PASSWORD'), # DB 비밀번호
-#         'HOST': config('DB_HOST'), # DB 엔드포인트
-#         'PORT': 3306,
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_NAME'), # DB(스키마) 이름
+        'USER': config('DB_USER'), # 유저 이름 (root)
+        'PASSWORD': config('DB_PASSWORD'), # DB 비밀번호
+        'HOST': config('DB_HOST'), # DB 엔드포인트
+        'PORT': 3306,
+    }
+}
 
 
 # Password validation
@@ -159,6 +161,7 @@ SWAGGER_SETTINGS = {
       }
    }
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 try:
