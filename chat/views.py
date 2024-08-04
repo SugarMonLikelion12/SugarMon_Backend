@@ -75,7 +75,31 @@ class GetChatMessagesAPI(APIView):
     @method_decorator(permission_classes([IsAuthenticated]))
     def get(self, request, chatRoomId):
         chatRoom = ChatRoom.objects.get(pk=chatRoomId)
-        messageList = Message.objects.filter(chatRoom=chatRoom, many=True).order_by('createdAt')
+        messageList = Message.objects.filter(chatRoom=chatRoom).order_by('createdAt')
 
         serializer = getMessagesSerializer(instance=messageList, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CheckIfMyMessageAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+            tags=['채팅'],
+            operation_summary="채팅방 메세지가 내가 보낸 메세지인지 확인",
+            operation_description="채팅방 메세지를 화면에 띄울 때, 그 메세지가 현재 사용자가 보낸 메세지인지 확인한다 (현재 사용자가 보낸 메세지라면 True)",
+            request_body=GetMessageSenderIdSerializer,
+            responses={200: openapi.Response(
+                description="불러오기 성공",
+                schema=CheckIfMyMessageSerializer
+            )})
+    @method_decorator(permission_classes([IsAuthenticated]))
+    def post(self, request):
+        senderId = request.data['senderId']
+        userId = request.user.id
+
+        if (senderId == userId):
+            serializer = CheckIfMyMessageSerializer({'isMe': True})
+        else:
+            serializer = CheckIfMyMessageSerializer({'isMe': False})
+        
         return Response(serializer.data, status=status.HTTP_200_OK)

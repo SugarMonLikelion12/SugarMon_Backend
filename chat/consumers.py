@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
 import jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import AccessToken
@@ -25,7 +26,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print("웹소켓에 클라이어늩가 연결됨")
 
         except ValueError as error: # 오류가 있는 경우, 오류 메시지를 반환
-            await self.send_json({"error": str(error)})
+            await self.send(text_data=json.dumps({"error": str(error)}, ensure_ascii=False)) # send() 함수는 문자열을 받아야 하므로, json.dumps()를 통해 딕셔너리를 문자열으로 덤핑
             await self.close()
 
 
@@ -35,34 +36,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(groupName, self.channel_name) # 현재 채널을 그룹에서 제거
         print("웹소켓에 클라이어늩가 연결 해제됨")
 
-    # 이건 별도의 컨슈머로 만들어야 할 거 같은데?? 메세지 보내고 받는 컨슈머
+    # 메세지 받았을 때 실행되는 함수
     async def receive(self, text_data=None, bytes_data=None):
-        print("asfsadf")
-        headers = dict(self.scope['headers'])
-        rawToken = headers.get(b'authorization')[7:]
+        data = json.loads(text_data)
+
+        # 발송자 정보 가져오기
+        rawToken = data['authorization']
         try:
-            accessToken = AccessToken(rawToken)
-            userId = accessToken.payload['user_id']
-            self.scope['user'] = await database_sync_to_async(User.objects.get)(pk=userId)
+            accessToken = AccessToken(rawToken[7:])
+            senderId = accessToken.payload['user_id']
+            sender = await database_sync_to_async(User.objects.get)(pk=senderId)
         except jwt.ExpiredSignatureError:
-            self.scope['userId'] = None
-            await self.close()
+            raise ValueError(f"만료된 토큰입니다.: {rawToken}")
         except jwt.InvalidTokenError:
-            self.scope['userId'] = None
-            await self.close()
+            raise ValueError(f"잘못된 토큰입니다.: {rawToken}")
 
         try:
-            data = json.loads(text_data)
-
             content = data['content'] # 채팅 내용
             chatRoomId = data['chatRoomId'] # 채팅방 id
-            sender = self.scope['user'] # 누가 그 채팅을 보냈는지
             groupName = f"chatRoom{chatRoomId}"
 
-            chatRoom = await ChatRoom.objects.get(pk=chatRoomId)
-            if chatRoom.DoesNotExist():
-                raise ValueError("존재하지 않는 채팅방 id입니다.")
-            
+            try:
+                chatRoom = await database_sync_to_async(ChatRoom.objects.get)(pk=chatRoomId)
+            except ObjectDoesNotExist:
+                raise ValueError(f"존재하지 않는 채팅방 id입니다: {chatRoomId}")
+
             # 메세지를 DB에 저장
             await self.saveMessage(chatRoom, sender, content)
 
@@ -70,22 +68,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(groupName, {
                 "type": "chatMessage",
                 "content": content,
-                "sender": sender, # 이렇게 하면 센더 객체 전체를 보내게 돼서 리팩토링 필요,
+                "senderId": senderId,
                 "chatRoomId": chatRoomId
             })
         
         except ValueError as error:
-            await self.send_json({"error": str(error)})
+            await self.send(text_data=json.dumps({"error": str(error)}, ensure_ascii=False))
 
     async def chatMessage(self, event): # 이게 type인가??? // 그룹 내의 다른 클라이언트로부터 메세지를 받아을 때, 그 메세지를 현재 채널(클라이언트)에 전송
         try:
             content = event['content']
-            sender = event['sender']
+            senderId = event['senderId']
             chatRoomId = event['chatRoomId']
-            await self.send_json({"content": content, "sender": sender, "chatRoomId": chatRoomId})
+            await self.send(text_data=json.dumps({"content": content, "senderId": senderId, "chatRoomId": chatRoomId}, ensure_ascii=False))
 
         except Exception as exception:
-            await self.send_json({"error": str(exception)})
+            await self.send(text_data=json.dumps({"error": str(exception)}, ensure_ascii=False))
 
     @database_sync_to_async # 기본적으로 DB 연산은 동기적이라서, 비동기로 바꿈으로써 웹소켓 비동기 흐름 성능을 개선
     def saveMessage(self, chatRoom, sender, content):

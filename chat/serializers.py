@@ -5,22 +5,28 @@ from user.serializers import getUserSerializer
 class getOpponentSerializer(serializers.Serializer):
     opponentId = serializers.IntegerField()
 
-class createChatRoomSerializer(serializers.ModelField):
+class createChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
         fields = ['id', 'user1', 'user2']
 
 class getMyChatRoomSerializer(serializers.ModelSerializer):
     opponentId = serializers.SerializerMethodField()
+    opponentNickname = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
-        fields = ['id', 'opponentId']
+        fields = ['id', 'opponentId', 'opponentNickname']
 
     def get_opponentId(self, obj):
         request = self.context.get('request')
         user = request.user
         return obj.user2.id if obj.user1 == user else obj.user1.id
+    
+    def get_opponentNickname(self, obj):
+        request = self.context.get('request')
+        user = request.user
+        return obj.user2.nickname if obj.user1 == user else obj.user1.nickname
 
 class getMessagesSerializer(serializers.ModelSerializer):
     isMyChat = serializers.SerializerMethodField() # 해당 메시지가 현재 접속자가 보낸 채팅이라면 True, 아니면 False
@@ -29,9 +35,9 @@ class getMessagesSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['sender', 'content', 'createdAt', 'isMyChat']
     
-    def checkMyChat(self, obj):
+    def get_isMyChat(self, obj):
         request = self.context.get('request')
-        user=  request.user
+        user = request.user
         return obj.sender == user
 
 # Message 모델에 대한 시리얼라이저 클래스입니다.
@@ -76,3 +82,9 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     # visitor_user의 이메일을 반환하는 메소드입니다.
     def get_visitor_user_email(self, obj):  
         return obj.visitor_user.visitor_user_email
+    
+class GetMessageSenderIdSerializer(serializers.Serializer):
+    senderId = serializers.IntegerField()
+
+class CheckIfMyMessageSerializer(serializers.Serializer):
+    isMe = serializers.BooleanField()
