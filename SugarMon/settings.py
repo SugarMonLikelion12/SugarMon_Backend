@@ -58,7 +58,6 @@ INSTALLED_APPS = [
 	'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt',
-    'drf_yasg',
     'user',
     'food',
     'gIndex',
