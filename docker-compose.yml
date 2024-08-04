@@ -3,8 +3,7 @@ services:
   web: # django 컨테이너
     image: server
     container_name: web
-    #command: bash -c "gunicorn SugarMon.wsgi:application -b 0.0.0.0:8000" # 서버 실행
-    command: daphne -b 0.0.0.0 -p 8000 SugarMon.asgi:application
+    command: bash -c "gunicorn SugarMon.asgi:application -b 0.0.0.0:8000" # 서버 실행=
     ports:
       - "8000:8000"
     restart: always
