@@ -4,7 +4,7 @@ import jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
-from .models import ChatRoom, Message
+from .models import ChatRoom, Message, User
 import json
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -21,22 +21,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
             groupName = f"chatRoom{self.chatRoomId}" # unique한 그룹 이름
             await self.channel_layer.group_add(groupName, self.channel_name) # 현재 채널을 그룹에 추가
+            await self.accept()
             print("웹소켓에 클라이어늩가 연결됨")
-
-            headers = dict(self.scope['headers'])
-            rawToken = headers.get(b'authorization')[7:]
-            try:
-                accessToken = AccessToken(rawToken)
-                self.scope['userId'] = accessToken.payload['user_id']
-                await self.accept()
-            except jwt.ExpiredSignatureError:
-                self.scope['user'] = None
-                await self.close()
-            except jwt.InvalidTokenError:
-                self.scope['user'] = None
-                await self.close()
-            
-            print(self.scope['userId'])
 
         except ValueError as error: # 오류가 있는 경우, 오류 메시지를 반환
             await self.send_json({"error": str(error)})
@@ -50,11 +36,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print("웹소켓에 클라이어늩가 연결 해제됨")
 
     # 이건 별도의 컨슈머로 만들어야 할 거 같은데?? 메세지 보내고 받는 컨슈머
-    async def receive_json(self, data):
+    async def receive(self, text_data=None, bytes_data=None):
+        print("asfsadf")
+        headers = dict(self.scope['headers'])
+        rawToken = headers.get(b'authorization')[7:]
         try:
+            accessToken = AccessToken(rawToken)
+            userId = accessToken.payload['user_id']
+            self.scope['user'] = await database_sync_to_async(User.objects.get)(pk=userId)
+        except jwt.ExpiredSignatureError:
+            self.scope['userId'] = None
+            await self.close()
+        except jwt.InvalidTokenError:
+            self.scope['userId'] = None
+            await self.close()
+
+        try:
+            data = json.loads(text_data)
+
             content = data['content'] # 채팅 내용
-            sender = data['user'] # 누가 그 채팅을 보냈는지
             chatRoomId = data['chatRoomId'] # 채팅방 id
+            sender = self.scope['user'] # 누가 그 채팅을 보냈는지
             groupName = f"chatRoom{chatRoomId}"
 
             chatRoom = await ChatRoom.objects.get(pk=chatRoomId)
