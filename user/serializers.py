@@ -21,3 +21,8 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.isDoctor = self.cleaned_data.get('isDoctor')
         user.save()
         return user
+
+class getUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'nickname']

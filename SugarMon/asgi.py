@@ -8,9 +8,16 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
+
+from channels.auth import AuthMiddleware
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+import chat.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SugarMon.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(), # http 요청은 기존 방식을 채용
+    "websocket": URLRouter(chat.routing.websocket_urlpatterns)
+})

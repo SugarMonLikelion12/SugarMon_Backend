@@ -39,7 +39,11 @@ ALLOWED_HOSTS = ['127.0.0.1', '3.37.188.30', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    # 기본 라이브러리
     'corsheaders',
+    'daphne',
+    'channels',
+    'drf_yasg',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,7 +58,6 @@ INSTALLED_APPS = [
 	'allauth.account',
     'allauth.socialaccount',
     'rest_framework_simplejwt',
-    'drf_yasg',
     'user',
     'food',
     'gIndex',
@@ -93,7 +96,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SugarMon.wsgi.application'
+ASGI_APPLICATION = 'SugarMon.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
