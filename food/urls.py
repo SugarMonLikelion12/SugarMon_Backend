@@ -8,5 +8,6 @@ urlpatterns = [
     path('registerAteFood', registerAteFoodAPI.as_view()),
     path('getAllAteFoodUser', getAllAteFoodUserAPI.as_view()),
     path('getMonthAteFoodUser/<int:year>/<int:month>', getMonthAteFoodUserAPI.as_view()),
+    path('getDailyAteFoodUser/<int:year>/<int:month>/<int:day>', getDailyAteFoodUserAPI.as_view()),
     path('deleteAteFood/<int:ateFoodId>', deleteAteFoodAPI.as_view()),
 ]
