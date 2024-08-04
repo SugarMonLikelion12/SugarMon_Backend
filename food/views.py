@@ -77,6 +77,28 @@ class getMonthAteFoodUserAPI(APIView):
             return Response({"message": "직렬화 도중 오류가 발생하였습니다."}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+class getDailyAteFoodUserAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+            tags=['먹은음식'],
+            operation_summary="특정 년월일에 현재 유저가 먹은음식 불러오기",
+            operation_description="요청한 year과 month, day에 현재 접속한 유저가 먹은 음식들을 불러온다. (날짜 기준 오름차순)",
+            responses={200: openapi.Response(
+                description="불러오기 성공",
+                schema=ResponseAteFoodSerializer(many=True)
+            )})
+    @method_decorator(permission_classes([IsAuthenticated]))
+    def get(self, request, year, month, day):
+        ateFoodList = AteFood.objects.filter(user=request.user, ateDate__year=year, ateDate__month=month, ate__day=day).order_by('ateDate')
+
+        try:
+            serializer = ResponseAteFoodSerializer(instance=ateFoodList, many=True)
+        except:
+            return Response({"message": "직렬화 도중 오류가 발생하였습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
     
 class deleteAteFoodAPI(APIView):
     authentication_classes = [JWTAuthentication]
