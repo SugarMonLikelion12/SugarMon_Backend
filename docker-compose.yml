@@ -4,7 +4,8 @@ services:
     image: server
     container_name: web
     #command: bash -c "gunicorn SugarMon.wsgi:application -b 0.0.0.0:8000" # 서버 실행=
-    command: bash -c "DJANGO_SETTINGS_MODULE=SugarMon.settings uvicorn SugarMon.asgi:application --host 0.0.0.0 --port 8000"
+    #command: bash -c "DJANGO_SETTINGS_MODULE=SugarMon.settings uvicorn SugarMon.asgi:application --host 0.0.0.0 --port 8000"
+    command: bash -c "gunicorn -k uvicorn.workers.UvicornWorker --access-logfile ./gunicorn-access.log main:app --bind 0.0.0.0:8000 --workers 2 --daemon"
     ports:
       - "8000:8000"
     restart: always
