@@ -12,7 +12,6 @@ services:
       - .:/app
     networks:
       - server
-    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
 
   nginx: # nginx 컨테이너
     image: nginx:latest
@@ -29,6 +28,7 @@ services:
       - web
     networks:
       - server
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
 
   certbot:
     image: certbot/certbot
