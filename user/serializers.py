@@ -2,6 +2,7 @@ from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from .models import User
 
+
 class CustomRegisterSerializer(RegisterSerializer):
     nickname = serializers.CharField(required=True)
     isDoctor = serializers.BooleanField(required=False)
@@ -26,3 +27,9 @@ class getUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'nickname']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'nickname', 'isDoctor')
