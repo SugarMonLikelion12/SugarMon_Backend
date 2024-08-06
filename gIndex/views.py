@@ -103,7 +103,7 @@ class getTodayGIAPI(APIView):
                 try:
                     gi = gIndex.objects.filter(Q(foodName=ateFood.name) & Q(Q(user=user) | Q(user=None))).first()
                     giSum += gi.gIndex
-                except gIndex.DoesNotExist:
+                except:
                     continue
 
         serializer = responseGISerializer({'gI': giSum})
