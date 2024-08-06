@@ -98,7 +98,7 @@ class getTodayGIAPI(APIView):
 
         giSum = 0
         ateFoodList = AteFood.objects.filter(user=user, ateDate__year=year, ateDate__month=month, ateDate__day=day, when=when).order_by('ateDate')
-        if ateFoodList.exist():
+        if ateFoodList.exists():
             for ateFood in ateFoodList:
                 try:
                     gi = gIndex.objects.filter(Q(foodName=ateFood.name) & Q(Q(user=user) | Q(user=None))).first()
