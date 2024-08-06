@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
+from chat.models import ChatRoom
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -77,7 +78,15 @@ class GetDoctorUserView(APIView):
             )})
     @method_decorator(permission_classes([IsAuthenticated]))
     def get(self, request):
-        doctorList = User.objects.filter(isDoctor=True)
+        user = request.user
+        if (user.isDoctor == False): # 의사가 아니면
+            doctorList = User.objects.filter(isDoctor=True)
 
-        serializer = GetDoctorUserSerializer(instance=doctorList, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+            serializer = GetDoctorUserSerializer(instance=doctorList, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:  # 의사이면
+            chatRoomList = ChatRoom.objects.filter(user2=user)
+            userList = User.objects.filter(id__in=chatRoomList.values_list('user1', flat=True))
+
+            serializer = GetDoctorUserSerializer(instance=userList, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
