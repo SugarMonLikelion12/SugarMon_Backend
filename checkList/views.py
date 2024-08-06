@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -53,3 +52,14 @@ class DailyChecklistView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
+class countContinuousChecklist(APIView):
+
+    def get(self, request):
+        user = request.user
+        today = date.today()
+
+        count = 0;
+        while (True):
+            for when in range(3):
+                checklist = Checklist.objects.get(user=user, date=today, when=when)
+                if checklist.meal_order == True & checklist.
