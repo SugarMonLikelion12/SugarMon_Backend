@@ -100,7 +100,7 @@ class getTodayGIAPI(APIView):
         ateFoodList = AteFood.objects.filter(user=user, ateDate__year=year, ateDate__month=month, ateDate__day=day, when=when).order_by('ateDate')
         for ateFood in ateFoodList:
             try:
-                gi = gIndex.objects.get(foodName=ateFood.name)
+                gi = gIndex.objects.filter(Q(foodName=ateFood.name) & Q(Q(user=user) | Q(user=None))).first()
                 giSum += gi.gIndex
             except gIndex.DoesNotExist:
                 continue
