@@ -17,3 +17,6 @@ class ChecklistSerializer(serializers.ModelSerializer):
             'sugar': {'label': '식후 액상과당 섭취'},
             'exercise': {'label': '운동 여부'},
         }
+
+class responseContinuousChecklist(serializers.Serializer):
+    days = serializers.IntegerField()
