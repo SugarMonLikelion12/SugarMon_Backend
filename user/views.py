@@ -5,11 +5,19 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg.utils import swagger_auto_schema
 from .models import User
 from dj_rest_auth.registration.views import RegisterView
-from .serializers import CustomRegisterSerializer
+from .serializers import *
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import permission_classes
+from django.utils.decorators import method_decorator
 
 class CustomRegisterView(RegisterView):
     queryset = User.objects.all()
@@ -56,3 +64,20 @@ class UserDetailView(APIView):
         user = request.user
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+class GetDoctorUserView(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+            operation_summary="의사 유저 가져오기",
+            operation_description="의사(isDoctor=True)인 유저만 가져온다",
+            responses={200: openapi.Response(
+                description="불러오기 성공",
+                schema=GetDoctorUserSerializer
+            )})
+    @method_decorator(permission_classes([IsAuthenticated]))
+    def get(self, request):
+        doctorList = User.objects.filter(isDoctor=True)
+
+        serializer = GetDoctorUserSerializer(instance=doctorList, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

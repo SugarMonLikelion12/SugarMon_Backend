@@ -31,9 +31,11 @@ class CreateChatRoomAPI(APIView):
         user = request.user
         opponent = User.objects.get(pk=request.data.get('opponentId'))
 
-        isExist = ChatRoom.objects.filter(Q(user1=user, user2=opponent) | Q(user1=opponent, user2=user)).exists()
+        isExist = ChatRoom.objects.filter(Q(user1=user, user2=opponent) | Q(user1=opponent, user2=user)).first()
         if isExist:
-            return Response({"message": "이미 해당 두 유저가 포함된 채팅방이 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            existId = isExist.id
+            serializer = responseChatRoomSerializer({'id': existId})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         serializer = createChatRoomSerializer(data={'user1':user.id, 'user2':opponent.id})
         if serializer.is_valid():

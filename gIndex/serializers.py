@@ -15,3 +15,6 @@ class GetFoodSerializer(serializers.ModelSerializer):
     class Meta:
         model = gIndex
         fields = ['id', 'foodName']
+
+class responseGISerializer(serializers.Serializer):
+    gI = serializers.IntegerField()
