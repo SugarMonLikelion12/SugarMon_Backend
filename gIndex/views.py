@@ -1,4 +1,5 @@
 from .serializers import *
+from food.models import AteFood
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -80,3 +81,29 @@ class getFoodAPI(APIView):
             return Response({"message": "직렬화 도중 오류가 발생하였습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data, status=  status.HTTP_200_OK)
+
+class getTodayGIAPI(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+            tags=['혈당지수'],
+            operation_summary="해당 날짜 특정 시간대 먹은 음식 gi 총합",
+            operation_description="해당 날짜 특정 시간대 먹은 음식 gi 총합 가져옴",
+            responses={
+                200: openapi.Response(description="불러오기 성공", schema=responseGISerializer),
+            })
+    @method_decorator(permission_classes([IsAuthenticated]))
+    def get(self, request, year, month, day, when):
+        user = request.user
+
+        giSum = 0
+        ateFoodList = AteFood.objects.filter(user=user, ateDate__year=year, ateDate__month=month, ateDate__day=day, when=when).order_by('ateDate')
+        for ateFood in ateFoodList:
+            try:
+                gi = gIndex.objects.get(foodName=ateFood.name)
+                giSum += gi.gIndex
+            except gIndex.DoesNotExist:
+                continue
+
+        serializer = responseGISerializer({'gI': giSum})
+        return Response(serializer.data, status=status.HTTP_200_OK)

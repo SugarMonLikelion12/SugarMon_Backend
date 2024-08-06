@@ -5,6 +5,9 @@ from user.serializers import getUserSerializer
 class getOpponentSerializer(serializers.Serializer):
     opponentId = serializers.IntegerField()
 
+class responseChatRoomSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
 class createChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
